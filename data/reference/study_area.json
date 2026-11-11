@@ -1,0 +1,23 @@
+{
+  "name": "Manhattan, New York City",
+  "crs": "EPSG:4326",
+  "note": "Approximate bounding box and hand-picked retail hub centres chosen by the project team as analysis anchors. Coordinates are approximate (about 100 m) and are not an official dataset.",
+  "bbox": {
+    "min_lat": 40.698,
+    "max_lat": 40.882,
+    "min_lon": -74.022,
+    "max_lon": -73.907
+  },
+  "hubs": [
+    {"hub_id": "H01", "name": "Times Square", "type": "tourist_retail", "lat": 40.7580, "lon": -73.9855},
+    {"hub_id": "H02", "name": "Herald Square", "type": "shopping", "lat": 40.7506, "lon": -73.9876},
+    {"hub_id": "H03", "name": "Grand Central", "type": "transit_commuter", "lat": 40.7527, "lon": -73.9772},
+    {"hub_id": "H04", "name": "Columbus Circle", "type": "mixed_retail", "lat": 40.7681, "lon": -73.9819},
+    {"hub_id": "H05", "name": "Union Square", "type": "mixed_retail", "lat": 40.7359, "lon": -73.9911},
+    {"hub_id": "H06", "name": "SoHo", "type": "shopping", "lat": 40.7233, "lon": -74.0030},
+    {"hub_id": "H07", "name": "Chelsea Market", "type": "food_retail", "lat": 40.7424, "lon": -74.0061},
+    {"hub_id": "H08", "name": "Financial District", "type": "commuter_office", "lat": 40.7060, "lon": -74.0088},
+    {"hub_id": "H09", "name": "Upper East Side (Lexington Ave)", "type": "residential_retail", "lat": 40.7794, "lon": -73.9552},
+    {"hub_id": "H10", "name": "Harlem (125th St)", "type": "residential_retail", "lat": 40.8075, "lon": -73.9456}
+  ]
+}
