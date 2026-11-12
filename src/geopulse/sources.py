@@ -52,6 +52,18 @@ def validate_catalog(df: pd.DataFrame) -> None:
         raise ValueError(f"Invalid status values: {sorted(bad_status)}")
 
 
+def mark_verified(source_id: str, path=CATALOG_PATH, on: str | None = None) -> None:
+    """Set status=verified and last_verified=<today> for a source in the catalog."""
+    from datetime import date
+    df = load_catalog(path)
+    if source_id not in set(df["source_id"]):
+        raise KeyError(source_id)
+    mask = df["source_id"] == source_id
+    df.loc[mask, "status"] = "verified"
+    df.loc[mask, "last_verified"] = on or date.today().isoformat()
+    df.to_csv(path, index=False)
+
+
 def load_study_area(path=STUDY_AREA_PATH) -> dict:
     """Read the study-area JSON and validate the bounding box and hubs."""
     with open(path, encoding="utf-8") as f:

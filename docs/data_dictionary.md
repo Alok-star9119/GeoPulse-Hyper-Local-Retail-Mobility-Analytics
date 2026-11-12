@@ -35,7 +35,40 @@ One row per candidate data source.
 | hubs[] | 10 retail hubs: `hub_id`, `name`, `type`, `lat`, `lon` (approximate centres chosen by the team) |
 
 ## Raw / processed datasets
-_To be filled as datasets are added (Day 3 onwards)._
 
-| Dataset | Column | Type | Description |
-|---------|--------|------|-------------|
+### NYC TLC yellow taxi trips (data/raw/tlc/yellow_tripdata_YYYY-MM.parquet, not committed)
+Only these columns are read by `geopulse.ingest_tlc.TRIP_COLUMNS`.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| tpep_pickup_datetime | datetime | Time the meter was engaged |
+| tpep_dropoff_datetime | datetime | Time the meter was disengaged |
+| PULocationID | int | Pickup taxi zone ID (see zone lookup) |
+| DOLocationID | int | Dropoff taxi zone ID |
+| passenger_count | float | Passengers (driver-entered, may be null) |
+| trip_distance | float | Trip distance in miles |
+| total_amount | float | Total charged to passenger (excludes cash tips) |
+
+### taxi_zone_lookup.csv (data/raw/tlc/, not committed)
+| Column | Type | Description |
+|--------|------|-------------|
+| LocationID | int | Taxi zone ID |
+| Borough | string | Borough name (we keep `Manhattan`) |
+| Zone | string | Zone name |
+| service_zone | string | Yellow Zone / Boro Zone / Airports / EWR |
+
+### reports/tables/tlc_hourly_profile_YYYY-MM.csv (committed, produced by scripts/ingest_tlc.py)
+| Column | Type | Description |
+|--------|------|-------------|
+| PULocationID | int | Manhattan pickup zone |
+| Zone | string | Zone name |
+| day_type | string | weekday or weekend |
+| hour | int | Hour of day (0-23) |
+| pickups_total | int | Pickups in that zone/hour/day type over the month |
+| days | int | Calendar days of that day type in the month |
+| avg_pickups | float | pickups_total / days |
+
+### Cleaning rules (basic_clean)
+Rows are dropped when: pickup is outside the target month; duration is <= 0 or > 6 hours;
+distance is <= 0 or > 100 miles; total_amount is negative; pickup zone is missing;
+or the row is an exact duplicate.

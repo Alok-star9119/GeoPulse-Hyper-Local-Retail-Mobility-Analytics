@@ -35,6 +35,7 @@ python -m geopulse.config        # prints resolved project paths
 pytest
 python scripts/plot_study_area.py   # regenerates reports/figures/study_area_hubs.png
 python scripts/check_sources.py     # checks source links (needs internet)
+python scripts/ingest_tlc.py --year 2024 --month 1   # Day 3 TLC ingestion (needs internet)
 ```
 
 ## Progress
@@ -44,3 +45,4 @@ See [docs/progress_log.md](docs/progress_log.md) for the daily log.
 - Day 1: project initialised.
 - Day 2: data sources researched and catalogued, study area defined (Manhattan).
   See [docs/data_sources.md](docs/data_sources.md) and `data/reference/`.
+- Day 3: NYC TLC taxi ingestion pipeline. See [docs/day3_tlc_ingestion.md](docs/day3_tlc_ingestion.md).
