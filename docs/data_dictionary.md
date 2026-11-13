@@ -72,3 +72,25 @@ Only these columns are read by `geopulse.ingest_tlc.TRIP_COLUMNS`.
 Rows are dropped when: pickup is outside the target month; duration is <= 0 or > 6 hours;
 distance is <= 0 or > 100 miles; total_amount is negative; pickup zone is missing;
 or the row is an exact duplicate.
+
+### OpenStreetMap retail POIs (data/interim/osm_pois.csv, not committed)
+Source: Overpass API, all `shop=*` plus amenities restaurant, cafe, fast_food, bar, pub, bank, pharmacy, marketplace inside the study-area bounding box. (c) OpenStreetMap contributors, ODbL.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| osm_type | string | node, way or relation |
+| osm_id | int | OSM object ID (unique together with osm_type) |
+| lat, lon | float | Location; for ways/relations the centre point |
+| name | string | POI name (often missing) |
+| shop / amenity | string | Original OSM tag values |
+| brand | string | Brand tag if present |
+| has_opening_hours | bool | True if an opening_hours tag exists |
+| category | string | GeoPulse group: food_beverage, food_retail, fashion, beauty_health, electronics_home, general_gifts, services, other_shop |
+| nearest_hub_id | string | Closest retail hub (H01-H10) |
+| nearest_hub_m | float | Distance to that hub in metres |
+
+### reports/tables/osm_hub_summary.csv (committed)
+One row per hub: `hub_id, hub_name, hub_type, radius_m, poi_total, poi_per_km2, named_share`, then one count column per category. Counts are POIs within `radius_m` (default 500 m) of the hub centre.
+
+### reports/tables/osm_category_counts.csv (committed)
+`category, poi_count, named_share, opening_hours_share` - overall POI counts and tag completeness.

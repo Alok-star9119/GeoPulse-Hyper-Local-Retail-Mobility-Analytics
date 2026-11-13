@@ -21,3 +21,14 @@ def nearest_hub(lat: float, lon: float, hubs) -> tuple[str, float]:
         raise ValueError("hubs is empty")
     best = min(hubs, key=lambda h: haversine_m(lat, lon, h.lat, h.lon))
     return best.hub_id, haversine_m(lat, lon, best.lat, best.lon)
+
+
+def haversine_m_array(lat, lon, lat0: float, lon0: float):
+    """Vectorised distance (metres) from many points to one point. Uses numpy."""
+    import numpy as np
+    lat, lon = np.asarray(lat, dtype=float), np.asarray(lon, dtype=float)
+    p1, p2 = np.radians(lat), math.radians(lat0)
+    dphi = p2 - p1
+    dlmb = np.radians(lon0 - lon)
+    a = np.sin(dphi / 2) ** 2 + np.cos(p1) * math.cos(p2) * np.sin(dlmb / 2) ** 2
+    return 2 * EARTH_RADIUS_M * np.arcsin(np.sqrt(a))
