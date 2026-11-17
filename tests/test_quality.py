@@ -146,3 +146,18 @@ def test_render_report(good):
     md = q.render_report(res, an, lineage, "2024-01")
     assert md.startswith("# Week 1 Data Quality Report (2024-01)")
     assert "| PASS |" in md and "city_hourly_panel_2024-01.csv" in md and "## Decisions" in md
+
+
+def test_hub_taxi_vs_city(good):
+    city, hub = good
+    assert q.check_hub_taxi_vs_city(hub, city)["status"] == "skip"          # no taxi column yet
+    h = hub.copy()
+    h["taxi_pickups"] = 0
+    h.loc[h.hub_id == "H01", "taxi_pickups"] = (city["taxi_pickups"] * 0.3).astype(int).values
+    r = q.check_hub_taxi_vs_city(h, city)
+    assert r["status"] == "pass" and "hold 29." in r["detail"]
+    h.loc[h.hub_id == "H02", "taxi_pickups"] = city["taxi_pickups"].values * 2   # now over the total
+    assert q.check_hub_taxi_vs_city(h, city)["status"] == "fail"
+    tiny = hub.copy()
+    tiny["taxi_pickups"] = 0
+    assert q.check_hub_taxi_vs_city(tiny, city)["status"] == "warn"          # catchments hold ~0%

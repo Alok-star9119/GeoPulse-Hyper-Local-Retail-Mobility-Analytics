@@ -64,6 +64,18 @@ def mark_verified(source_id: str, path=CATALOG_PATH, on: str | None = None) -> N
     df.to_csv(path, index=False)
 
 
+def ensure_source(row: dict, path=CATALOG_PATH) -> bool:
+    """Append a source to the catalog if its source_id is missing. Returns True if added."""
+    df = load_catalog(path)
+    if row["source_id"] in set(df["source_id"]):
+        return False
+    new = pd.DataFrame([{c: str(row.get(c, "")) for c in REQUIRED_COLUMNS}])
+    out = pd.concat([df, new], ignore_index=True)
+    validate_catalog(out)
+    out.to_csv(path, index=False)
+    return True
+
+
 def load_study_area(path=STUDY_AREA_PATH) -> dict:
     """Read the study-area JSON and validate the bounding box and hubs."""
     with open(path, encoding="utf-8") as f:

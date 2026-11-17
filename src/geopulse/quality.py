@@ -106,6 +106,23 @@ def check_hub_matches_city(hub: pd.DataFrame, city: pd.DataFrame) -> dict:
     return _r("hub_sum_equals_city", "hub vs city", "fail", f"{diff} hours differ")
 
 
+def check_hub_taxi_vs_city(hub: pd.DataFrame, city: pd.DataFrame) -> dict:
+    """Taxi pickups assigned to hubs can never exceed all Manhattan pickups in the same hour."""
+    scope = "hub vs city"
+    if "taxi_pickups" not in hub.columns:
+        return _r("hub_taxi_within_city", scope, "skip", "no taxi column in hub panel (run Day 8 first)")
+    h = hub.groupby("datetime")["taxi_pickups"].sum()
+    c = city.set_index("datetime")["taxi_pickups"]
+    joined = pd.concat([h, c], axis=1, keys=["hub", "city"]).fillna(0)
+    over = int((joined["hub"] > joined["city"]).sum())
+    if over:
+        return _r("hub_taxi_within_city", scope, "fail", f"{over} hours where hub taxi pickups exceed the city total")
+    share = joined["hub"].sum() / joined["city"].sum() if joined["city"].sum() else float("nan")
+    status = "warn" if share < 0.05 else "pass"
+    return _r("hub_taxi_within_city", scope, status,
+              f"hub catchment zones hold {share:.1%} of all Manhattan taxi pickups; never above the city total")
+
+
 def check_static_columns(hub: pd.DataFrame, cols: list[str]) -> dict:
     present = [c for c in cols if c in hub.columns]
     if not present:
@@ -193,6 +210,7 @@ def run_all(city: pd.DataFrame, hub: pd.DataFrame, year: int, month: int, hubs_c
         check_unique(hub, ["hub_id", "datetime"], "hub panel"),
         check_no_negative(hub, ["bike_starts"], "hub panel"),
         check_hub_matches_city(hub, city),
+        check_hub_taxi_vs_city(hub, city),
         check_static_columns(hub, ["osm_poi_total", "osm_poi_per_km2", "osm_named_share"]),
         check_hubs_without_bikes(hub),
     ]
