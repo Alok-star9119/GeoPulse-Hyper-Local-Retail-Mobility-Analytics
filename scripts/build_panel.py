@@ -31,8 +31,8 @@ import pandas as pd
 from geopulse.config import (FIGURES_DIR, INTERIM_DIR, RAW_DIR, REFERENCE_DIR, REPORTS_DIR,
                              ensure_directories)
 from geopulse.ingest_citibike import assign_hubs, process_file, station_table
-from geopulse.ingest_weather import (add_weather_flags, download_weather, load_weather,
-                                     weather_quality)
+from geopulse.ingest_weather import (add_weather_flags, download_weather, fill_missing_hours,
+                                     load_weather, weather_quality)
 from geopulse.panel import (bike_hourly_by_hub, city_panel, daily_summary, hub_mode_summary,
                             hub_panel, taxi_hourly, taxi_hourly_by_hub, weather_effect)
 from geopulse.sources import get_hubs, load_study_area, mark_verified
@@ -78,7 +78,7 @@ def main() -> None:
     hubs = get_hubs(area)
 
     # 1. weather
-    weather = add_weather_flags(load_weather(download_weather(y, m)))
+    weather = add_weather_flags(fill_missing_hours(load_weather(download_weather(y, m)), y, m))
     mark_verified("open_meteo")
     wq = weather_quality(weather, y, m)
     (tables / f"weather_quality_{ym}.json").write_text(json.dumps(wq, indent=2))
