@@ -134,3 +134,7 @@ def test_render_report(tables):
     one = mm.render_report(MONTHS[:1], mm.monthly_overview(tables, MONTHS[:1]), pd.DataFrame(), pd.DataFrame(),
                            pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
     assert "Only one month available" in one
+
+
+def test_empty_correlations_do_not_crash():
+    assert mm.correlation_consistency(pd.DataFrame()).empty

@@ -98,6 +98,8 @@ def rank_stability(stats_all: pd.DataFrame, value: str = "total") -> pd.DataFram
 # ---------- consistency of retail-mobility correlations ----------
 def correlation_consistency(corr_all: pd.DataFrame, min_abs: float = MIN_ABS_RHO) -> pd.DataFrame:
     """Which Day 10 correlations keep the same sign and a meaningful size in every month?"""
+    if corr_all.empty or "rho" not in corr_all.columns:
+        return pd.DataFrame()
     rows = []
     for (rf, mf), g in corr_all.dropna(subset=["rho"]).sort_values("month").groupby(["retail_feature", "mobility_feature"]):
         rho = g["rho"]
