@@ -85,6 +85,21 @@ def check_weather_ranges(df: pd.DataFrame, scope: str) -> dict:
               f"precip max {df['precip_mm'].max():.1f} mm/h, wind max {df['wind_kmh'].max():.0f} km/h")
 
 
+FILLED_WARN, FILLED_FAIL = 0.01, 0.05
+
+
+def check_weather_filled(city: pd.DataFrame, scope: str) -> dict:
+    """Share of hours whose weather was interpolated (Day 11, e.g. a daylight-saving gap). A few is normal."""
+    if "weather_filled" not in city.columns:
+        return _r("weather_filled", scope, "pass", "no weather_filled column (older panel); nothing was interpolated")
+    n = int(city["weather_filled"].fillna(False).astype(bool).sum())
+    share = n / len(city) if len(city) else 0.0
+    detail = f"{n} of {len(city)} hours interpolated ({100 * share:.1f}%)"
+    if share > FILLED_FAIL:
+        return _r("weather_filled", scope, "fail", detail + f"; more than {FILLED_FAIL:.0%} is too much to trust")
+    return _r("weather_filled", scope, "warn" if share > FILLED_WARN else "pass", detail)
+
+
 def check_daytime_gaps(city: pd.DataFrame, cols: list[str], scope: str) -> dict:
     """Zero trips in a daytime hour usually means missing data, not a quiet city."""
     day = city[city["hour"].isin(DAYTIME)]
@@ -204,6 +219,7 @@ def run_all(city: pd.DataFrame, hub: pd.DataFrame, year: int, month: int, hubs_c
         check_nulls(city, ["taxi_pickups", "bike_starts_hubs", "temp_c", "precip_mm", "wind_kmh"], "city panel"),
         check_no_negative(city, ["taxi_pickups", "bike_starts_hubs", "precip_mm"], "city panel"),
         check_weather_ranges(city, "city panel"),
+        check_weather_filled(city, "city panel"),
         check_daytime_gaps(city, ["taxi_pickups", "bike_starts_hubs"], "city panel"),
         check_schema(hub, HUB_REQUIRED, "hub panel"),
         check_row_count(hub, n * hubs_count, "hub panel"),

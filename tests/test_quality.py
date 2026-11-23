@@ -161,3 +161,12 @@ def test_hub_taxi_vs_city(good):
     tiny = hub.copy()
     tiny["taxi_pickups"] = 0
     assert q.check_hub_taxi_vs_city(tiny, city)["status"] == "warn"          # catchments hold ~0%
+
+
+def test_weather_filled_check():
+    base = pd.DataFrame({"datetime": pd.date_range("2024-03-01", periods=744, freq="h")})
+    assert q.check_weather_filled(base, "c")["status"] == "pass"                       # older panel without the column
+    for n, status in ((0, "pass"), (1, "pass"), (20, "warn"), (60, "fail")):          # 0.1%, 2.7%, 8%
+        d = base.assign(weather_filled=[True] * n + [False] * (744 - n))
+        assert q.check_weather_filled(d, "c")["status"] == status, n
+    assert "1 of 744" in q.check_weather_filled(base.assign(weather_filled=[True] + [False] * 743), "c")["detail"]
