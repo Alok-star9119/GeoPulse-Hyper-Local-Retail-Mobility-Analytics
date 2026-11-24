@@ -1,4 +1,10 @@
-"""Plot the Manhattan study area bounding box and retail hubs -> reports/figures."""
+"""Plot the Manhattan study area bounding box and retail hubs.
+
+Usage
+  python scripts/plot_study_area.py
+
+Output (committed): reports/figures/study_area_hubs.png
+"""
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
