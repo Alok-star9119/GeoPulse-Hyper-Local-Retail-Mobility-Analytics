@@ -4,7 +4,7 @@ YEAR ?= 2024
 MONTH ?= 1
 MONTHS ?= 2024-02 2024-03
 
-.PHONY: test check month months compare forecast dashboard numbers
+.PHONY: test check month months compare forecast dashboard numbers findings
 
 test:       ## run the unit tests
 	$(PY) -m pytest -q
@@ -32,3 +32,6 @@ dashboard:  ## offline HTML dashboard
 
 numbers:    ## headline numbers for the summary
 	$(PY) scripts/week2_key_numbers.py
+
+findings:   ## findings draft and table catalog (run after the steps above)
+	$(PY) scripts/build_findings.py
