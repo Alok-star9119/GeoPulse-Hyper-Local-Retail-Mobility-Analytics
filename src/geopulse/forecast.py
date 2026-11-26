@@ -50,19 +50,20 @@ def _design(df: pd.DataFrame, temp_mean: float) -> np.ndarray:
     return np.column_stack([wet, snow, temp])
 
 
-def fit_weather_model(train: pd.DataFrame, target: str, iterations: int = 20) -> tuple[pd.Series, np.ndarray, float]:
+def fit_weather_model(train: pd.DataFrame, target: str, iterations: int = 20, design=None) -> tuple[pd.Series, np.ndarray, float]:
     """Fit hour-of-week levels and weather coefficients together (backfitting).
 
     A plain hour-of-week mean already contains the rain that fell in those hours, so regressing its
     residual on rain would understate the rain effect. Alternating the two fits removes that bias.
     Returns (hour-of-week levels, coefficients [wet, snow, temp per C], mean training temperature).
     """
+    design = design or _design                                # a different design matrix lets experiments add interactions
     y = train[target].to_numpy(dtype=float)
     tm = float(train["temp_c"].mean()) if train["temp_c"].notna().any() else 0.0
-    X = _design(train, tm)
+    X = design(train, tm)
     live = np.abs(X).sum(axis=0) > 0                          # a flag that never occurs cannot be estimated
     key = how_key(train).to_numpy()
-    coef = np.zeros(3)
+    coef = np.zeros(X.shape[1])
     for _ in range(iterations):
         lvl = pd.Series(y - X @ coef).groupby(key).mean().reindex(range(WEEK))
         lvl = lvl.fillna(float(np.nanmean(y - X @ coef)))
@@ -72,9 +73,9 @@ def fit_weather_model(train: pd.DataFrame, target: str, iterations: int = 20) ->
     return lvl, coef, tm
 
 
-def predict_weather(test: pd.DataFrame, levels: pd.Series, coef: np.ndarray, tm: float) -> np.ndarray:
+def predict_weather(test: pd.DataFrame, levels: pd.Series, coef: np.ndarray, tm: float, design=None) -> np.ndarray:
     base = levels.reindex(how_key(test)).to_numpy()
-    return np.clip(base + _design(test, tm) @ coef, 0, None)
+    return np.clip(base + (design or _design)(test, tm) @ coef, 0, None)
 
 
 def metrics(actual, pred) -> dict:
